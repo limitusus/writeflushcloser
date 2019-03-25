@@ -1,0 +1,41 @@
+version: 2.1
+
+executors:
+  builder:
+    docker:
+      - image: elasticinfra/circleci-base:golang-1.11
+
+jobs:
+  build:
+    executor: builder
+
+    steps:
+      - run: mkdir /tmp/test-results
+      - run: echo 'export PATH=${GOPATH}/bin/:${PATH}' >> $BASH_ENV
+      - checkout
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
+      - run: go mod vendor
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+      - run: go get github.com/golang/lint/golint
+      - run: golint ./...
+      - run: go vet ./...
+      - run: go test -v -race ./...
+      - run: go test -coverprofile=./coverage.text ./... | tee /tmp/test-results/coverage.out
+      - run: go tool cover -html=./coverage.text -o /tmp/test-results/coverage.html
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: test-results
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: /.*/
