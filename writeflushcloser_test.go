@@ -32,6 +32,12 @@ func TestDumbLogger(t *testing.T) {
 	if l != 4 {
 		t.Fatalf("Wrong length (expected 4, actual %d)", l)
 	}
+	if err = logger.Flush(); err != nil {
+		t.Fatalf("Flush should not fail")
+	}
+	if err = logger.Close(); err != nil {
+		t.Fatalf("Close should not fail")
+	}
 }
 
 func TestStandardWriteFlushCloser(t *testing.T) {
@@ -58,6 +64,12 @@ func TestStandardWriteFlushCloser(t *testing.T) {
 	}
 	if l != 4 {
 		t.Fatalf("Wrong length (expected 4, actual %d)", l)
+	}
+	if err = logger.Flush(); err != nil {
+		t.Fatalf("Flush should not fail")
+	}
+	if err = logger.Close(); err != nil {
+		t.Fatalf("Close should not fail")
 	}
 }
 
